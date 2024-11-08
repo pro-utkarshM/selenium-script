@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By  # Import By class
+from selenium.webdriver.common.by import By
 
 # Configure Chrome options
 chrome_options = Options()
@@ -17,19 +17,21 @@ service = Service(ChromeDriverManager().install())
 # Initialize WebDriver
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-# Open the desired webpage
-driver.get('https://github.com/royswastik/intelligent-team-building-recommendation-system')  # Replace with your desired URL
+# Open the research paper URL (e.g., an arXiv or publisher page)
+driver.get('https://arxiv.org/abs/2301.09856')  # Example paper URL (replace with actual)
 
 # Wait for the page to load
-time.sleep(2)  # Adjust the time based on page load time
+time.sleep(3)  # Adjust the time based on page load time
 
-# Extract page title as an example
-page_title = driver.title
-print(f"Page Title: {page_title}")
+# Extract title, authors, and abstract (you need to inspect the specific webpage)
+title = driver.find_element(By.TAG_NAME, 'h1').text  # Title for arXiv
+authors = driver.find_element(By.CSS_SELECTOR, '.authors').text  # Authors for arXiv
+abstract = driver.find_element(By.CSS_SELECTOR, 'blockquote.abstract').text  # Abstract for arXiv
 
-# Extract the first heading (h1) from the page using the updated find_element method
-heading = driver.find_element(By.TAG_NAME, 'h1').text
-print(f"First Heading: {heading}")
+# Print extracted content
+print(f"Title: {title}")
+print(f"Authors: {authors}")
+print(f"Abstract: {abstract}")
 
 # Close the driver
 driver.quit()
