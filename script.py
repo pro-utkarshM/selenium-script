@@ -2,36 +2,51 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # Configure Chrome options
 chrome_options = Options()
-chrome_options.add_argument("--headless")  # Run headless (without GUI)
-chrome_options.add_argument("--no-sandbox")  # To avoid sandboxing issues
-chrome_options.add_argument("--disable-dev-shm-usage")  # To avoid issues with shared memory
+chrome_options.add_argument("--headless")  # Run in headless mode
+chrome_options.add_argument("--no-sandbox")  # Avoid sandboxing issues
+chrome_options.add_argument("--disable-dev-shm-usage")  # Prevent shared memory issues
 
-# Automatically download the correct version of ChromeDriver using webdriver_manager
-service = Service(ChromeDriverManager().install())
+# Specify the correct ChromeDriver binary path manually
+chromedriver_path = "/home/gilfoyle/.wdm/drivers/chromedriver/linux64/131.0.6778.69/chromedriver-linux64/chromedriver"
+service = Service(chromedriver_path)
 
-# Initialize WebDriver
+# Debug: Print the path to ensure correctness
+print(f"Using ChromeDriver binary at: {chromedriver_path}")
+
+# Initialize WebDriver with the specified service and options
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-# Open the research paper URL (e.g., an arXiv or publisher page)
-driver.get('https://arxiv.org/abs/2301.09856')  # Example paper URL (replace with actual)
+# Define the URL to scrape
+url = "https://arxiv.org/abs/2301.09856"
+print(f"Fetching data from: {url}")
 
-# Wait for the page to load
-time.sleep(3)  # Adjust the time based on page load time
+try:
+    # Open the webpage
+    driver.get(url)
 
-# Extract title, authors, and abstract (you need to inspect the specific webpage)
-title = driver.find_element(By.TAG_NAME, 'h1').text  # Title for arXiv
-authors = driver.find_element(By.CSS_SELECTOR, '.authors').text  # Authors for arXiv
-abstract = driver.find_element(By.CSS_SELECTOR, 'blockquote.abstract').text  # Abstract for arXiv
+    # Extract elements using WebDriverWait for robustness
+    wait = WebDriverWait(driver, 10)
+    title = wait.until(EC.presence_of_element_located((By.TAG_NAME, "h1"))).text
+    authors = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".authors"))).text
+    abstract_element = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "blockquote.abstract")))
+    abstract = abstract_element.text.replace("Abstract: ", "").strip()
 
-# Print extracted content
-print(f"Title: {title}")
-print(f"Authors: {authors}")
-print(f"Abstract: {abstract}")
+    # Print the extracted information
+    print("\nExtracted Information:")
+    print(f"Title: {title}")
+    print(f"Authors: {authors}")
+    print(f"Abstract: {abstract}")
 
-# Close the driver
-driver.quit()
+except Exception as e:
+    print("An error occurred:", e)
+
+finally:
+    # Close the WebDriver
+    driver.quit()
+    print("WebDriver closed.")
